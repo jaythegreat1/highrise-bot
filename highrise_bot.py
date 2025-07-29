@@ -1,17 +1,18 @@
 import asyncio
 import websockets
 import json
+import os
 
-# 🔐 Replace with your real token and room_id
-API_TOKEN = "b2873944dec863e4fb25857f843528f63f9126dc5bb9b50faa9b1900b7d1ebea"
-ROOM_ID = "6888a307b95ec91e67028e2e"
+# ✅ These are now pulled securely from environment variables
+API_TOKEN = os.getenv("API_TOKEN")
+ROOM_ID = os.getenv("ROOM_ID")
 
-# 🌍 Highrise gateway
+# 🌍 Highrise WebSocket Gateway
 URL = "wss://gateway.highrise.game/web/websocket"
 
 async def connect():
     async with websockets.connect(URL) as websocket:
-        # 🔑 Authenticate
+        # 🔑 Authenticate the bot
         await websocket.send(json.dumps({
             "op": 0,
             "d": {
@@ -27,13 +28,13 @@ async def connect():
                 message = await websocket.recv()
                 data = json.loads(message)
 
-                if data.get("op") == 1:  # Incoming chat or action
+                # Handle chat messages
+                if data.get("op") == 1:
                     user = data["d"]["user"]["username"]
                     content = data["d"].get("content", "")
 
                     print(f"📩 {user}: {content}")
 
-                    # Example emote reaction
                     if "hello" in content.lower():
                         await websocket.send(json.dumps({
                             "op": 26,
@@ -53,5 +54,5 @@ async def connect():
                 print("⚠️ Error:", e)
                 break
 
-# Run it
+# 🚀 Start the bot
 asyncio.run(connect())
